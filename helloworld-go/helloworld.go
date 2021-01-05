@@ -86,8 +86,8 @@ func NewGlobalTracer(applicationName string, serviceName string) io.Closer {
 	}
 
 	appTags     := application.New(applicationName, serviceName)
-	wfReporter := reporter.New(sender, appTags, reporter.Source("hello-tracing.serverless-demo.example.com.com"))
-	clReporter := reporter.NewConsoleSpanReporter("hello-tracing.serverless-demo.example.com.com") //Specify the same source you used for the WavefrontSpanReporter
+	wfReporter := reporter.New(sender, appTags, reporter.Source("hello-tracing.serverless-demo.example.com"))
+	clReporter := reporter.NewConsoleSpanReporter("hello-tracing.serverless-demo.example.com") //Specify the same source you used for the WavefrontSpanReporter
 	reporter := reporter.NewCompositeSpanReporter(wfReporter, clReporter)
 	tracer      := tracer.New(reporter)
 
