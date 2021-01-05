@@ -77,6 +77,10 @@ func NewGlobalTracer(applicationName string, serviceName string) io.Closer {
 
 	directCfg := directConfiguration()
 	sender, err := senders.NewDirectSender(directCfg)
+
+	//proxyCfg := proxyConfiguration()
+	//Create the proxy sender
+	//sender, err := senders.NewProxySender(proxyCfg)
 	if err != nil {
 		panic(err)
 	}
@@ -100,4 +104,15 @@ func directConfiguration() *senders.DirectConfiguration {
 	}
 }
 
+func proxyConfiguration() *senders.ProxyConfiguration {
+	return &senders.ProxyConfiguration{
+		// The proxy hostname or address
+		Host: "wavefront-proxy.default.svc.cluster.local",
+
+		// Set the proxy port to send metrics to. Default: 2878
+		MetricsPort: 2878,
+
+		// Set a proxy port to send histograms to. Recommended: 2878
+		DistributionPort: 2878,
+	}
 }
