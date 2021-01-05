@@ -75,11 +75,7 @@ func NewGlobalTracer(applicationName string, serviceName string) io.Closer {
 	// From: https://demo.wavefront.com/integration/go/setup
 	// and https://github.com/wavefrontHQ/wavefront-opentracing-sdk-go
 
-	directCfg := &senders.DirectConfiguration{
-		Server: "https://vmware.wavefront.com",
-		Token:  "",
-	}
-
+	directCfg := directConfiguration()
 	sender, err := senders.NewDirectSender(directCfg)
 	if err != nil {
 		panic(err)
@@ -94,5 +90,14 @@ func NewGlobalTracer(applicationName string, serviceName string) io.Closer {
 	opentracing.SetGlobalTracer(tracer)
 
 	return ioutil.NopCloser(nil)
+
+}
+
+func directConfiguration() *senders.DirectConfiguration {
+	return &senders.DirectConfiguration{
+		Server: "https://vmware.wavefront.com",
+		Token:  "3d67b8df-7e10-4365-8be7-3c526c888686",
+	}
+}
 
 }
