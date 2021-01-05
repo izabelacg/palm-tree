@@ -1,0 +1,11 @@
+# See: https://github.com/wavefrontHQ/wavefront-kubernetes/tree/master/istio
+# Source: https://github.com/wavefrontHQ/wavefront-kubernetes/blob/master/istio/zipkin-svc-redirect.yml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin
+  namespace: istio-system
+spec:
+  type: ExternalName
+  externalName: wavefront-proxy.default.svc.cluster.local
