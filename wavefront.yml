@@ -1,4 +1,5 @@
 # See: https://docs.wavefront.com/kubernetes.html
+# See: https://github.com/wavefrontHQ/wavefront-sdk-go#option-1-sending-data-via-the-wavefront-proxy
 # Source: https://raw.githubusercontent.com/wavefrontHQ/wavefront-kubernetes/master/wavefront-proxy/wavefront.yaml
 
 # Need to change YOUR_CLUSTER and YOUR_API_TOKEN accordingly
@@ -35,12 +36,14 @@ spec:
               value: YOUR_API_TOKEN
             # Uncomment the below lines to consume Zipkin/Istio traces
             - name: WAVEFRONT_PROXY_ARGS
-              value: --traceZipkinListenerPorts 9411
+              value: "--traceZipkinListenerPorts 9411 --customTracingListenerPorts 30001"
           ports:
             - containerPort: 2878
               protocol: TCP
             # Uncomment the below lines to consume Zipkin/Istio traces
             - containerPort: 9411
+              protocol: TCP
+            - containerPort: 30001
               protocol: TCP
           securityContext:
             privileged: false
@@ -61,6 +64,9 @@ spec:
     - name: http
       port: 9411
       targetPort: 9411
+      protocol: TCP
+    - name: http-tracing
+      port: 30001
       protocol: TCP
   selector:
     app: wavefront-proxy

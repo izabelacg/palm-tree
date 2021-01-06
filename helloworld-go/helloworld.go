@@ -112,6 +112,8 @@ func proxyConfiguration() *senders.ProxyConfiguration {
 		// Set the proxy port to send metrics to. Default: 2878
 		MetricsPort: 2878,
 
+		TracingPort: 30001,
+
 		// Set a proxy port to send histograms to. Recommended: 2878
 		DistributionPort: 2878,
 	}
