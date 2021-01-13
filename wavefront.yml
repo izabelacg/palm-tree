@@ -25,6 +25,10 @@ spec:
       labels:
         app: wavefront-proxy
     spec:
+      # for TKGs (Calatrava) include 2 lines below
+      # and add a secret with docker registry credentials to avoid rate limiting issues (see Observability-Attempts.txt)
+#      imagePullSecrets:
+#        - name: regcred
       containers:
         - name: wavefront-proxy
           image: wavefronthq/proxy:9.1

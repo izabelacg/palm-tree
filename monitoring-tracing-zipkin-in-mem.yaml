@@ -51,6 +51,10 @@ spec:
 #      annotations:
 #        sidecar.istio.io/inject: "false"
     spec:
+      # for TKGs (Calatrava) include 2 lines below
+      # and add a secret with docker registry credentials to avoid rate limiting issues (see Observability-Attempts.txt)
+#      imagePullSecrets:
+#        - name: regcred
       containers:
         - name: zipkin
           image: docker.io/openzipkin/zipkin:2.13.0
