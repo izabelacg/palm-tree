@@ -20,7 +20,7 @@ metadata:
   name: zipkin
   # istio assumes that zipkin is installed in istio-system namespace - 
   # we have to install to istio-system until istio allows overriding this behavior.
-  namespace: istio-system
+#  namespace: istio-system
   labels:
     serving.knative.dev/release: devel
 spec:
@@ -34,7 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zipkin
-  namespace: istio-system
+#  namespace: istio-system
   labels:
     serving.knative.dev/release: devel
 spec:
@@ -48,8 +48,8 @@ spec:
         app: zipkin
         serving.knative.dev/release: devel
       # if istio not present, comment the 2 lines below
-      annotations:
-        sidecar.istio.io/inject: "false"
+#      annotations:
+#        sidecar.istio.io/inject: "false"
     spec:
       containers:
         - name: zipkin
