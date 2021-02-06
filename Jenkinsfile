@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        docker { image 'izabelacg/ruby-wf-cli:latest' }
+        docker { image 'gcr.io/playground-igomes/ruby-wf-cli:latest' }
     }
     parameters {
         string(name: 'WF_ENDPOINT', defaultValue: 'vmware.wavefront.com', description: 'Wavefront Instance URL')
