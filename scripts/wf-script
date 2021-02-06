@@ -1,0 +1,35 @@
+#!/bin/bash
+echo "Configuring wavefront-cli..."
+wf config envvars > /dev/null
+wf source list --limit 1
+
+exitcode=$?
+if [ $exitcode -eq 0 ]; then
+ echo "Connected to Wavefront."
+else
+ echo "Could not connect to Wavefront"
+ exit 1
+fi
+
+# ACTIVE PROXY
+response=$(wf proxy search hostname="$WAVEFRONT_PROXY")
+if [ "$response" == "No matches." ]; then
+  echo "Could not find active proxy $WAVEFRONT_PROXY"
+  exit 1
+else
+  echo "$response" | cut -d " " -f1
+fi
+proxy_id=$(echo "$response" | cut -d " " -f1)
+echo "Proxy $WAVEFRONT_PROXY has id number: $proxy_id"
+
+# METRIC
+
+echo "Searching for recent metrics starting with $METRIC"
+wf spy points --prefix="$METRIC" --end-after=60
+
+# tanzu.vmware.com/serverless.contour.contour.build.info.gauge
+# tanzu.vmware.com/serverless.knative.activator.client.results.counter
+# tanzu.vmware.com/serverless.knative.autoscaler.client.results.counter
+# tanzu.vmware.com/serverless.knative.contour.ingress.controller.client.results.counter
+# tanzu.vmware.com/serverless.knative.controller.client.results.counter
+# tanzu.vmware.com/serverless.knative.webhook.client.results.counter
