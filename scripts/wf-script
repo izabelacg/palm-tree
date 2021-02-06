@@ -17,9 +17,8 @@ if [ "$response" == "No matches." ]; then
   echo "Could not find active proxy $WAVEFRONT_PROXY"
   exit 1
 else
-  echo "$response" | cut -d " " -f1
+  proxy_id=$(echo "$response" | cut -d " " -f1)
 fi
-proxy_id=$(echo "$response" | cut -d " " -f1)
 echo "Proxy $WAVEFRONT_PROXY has id number: $proxy_id"
 
 # METRIC
