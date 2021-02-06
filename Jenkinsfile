@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('search-wave') {
             environment {
-                WAVEFRONT_ENDPOINT = "${param.$WF_ENDPOINT}"
+                WAVEFRONT_ENDPOINT = "${param.WF_ENDPOINT}"
                 WAVEFRONT_PROXY = "${param.WF_PROXY}"
                 WAVEFRONT_TOKEN = credentials('wf_token')
                 METRIC = "${param.METRIC_NAME}"
