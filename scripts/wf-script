@@ -11,6 +11,10 @@ else
  exit 1
 fi
 
+# TODO: find proxy dynamically per user maybe?
+#wf proxy list --active
+#wf proxy describe <proxy id>
+
 # ACTIVE PROXY
 response=$(wf proxy search hostname="$WAVEFRONT_PROXY")
 if [ "$response" == "No matches." ]; then

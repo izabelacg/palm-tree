@@ -4,7 +4,7 @@ pipeline {
     }
     parameters {
         string(name: 'WF_ENDPOINT', defaultValue: 'vmware.wavefront.com', description: 'Wavefront Instance URL')
-        string(name: 'WF_PROXY', defaultValue: '', description: 'Wavefront Proxy')
+        string(name: 'WF_PROXY', defaultValue: 'wavefront-proxy-689fb6b759-4nszs', description: 'Wavefront Proxy')
         string(name: 'METRIC_NAME', defaultValue: 'tanzu.vmware.com/serverless', description: '')
 //         password(name: 'WF_TOKEN', defaultValue: '', description: 'Wavefront Token')
     }
