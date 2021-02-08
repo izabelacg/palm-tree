@@ -1,4 +1,4 @@
-#Source: https://github.com/wavefrontHQ/wavefront-collector-for-kubernetes/blob/f01696b42536bb02a677c178ff855b2cafd33a07/deploy/kubernetes/4-collector-config.yaml#L1
+#Source: https://github.com/wavefrontHQ/wavefront-collector-for-kubernetes/blob/master/deploy/kubernetes/4-collector-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,6 +6,7 @@ metadata:
   namespace: wavefront-collector
 data:
   collector.yaml: |
+    # clusterName: cedarvale-park-icg
     clusterName: education-eks-nhd0axNZ
     enableEvents: false
     enableDiscovery: true
@@ -27,6 +28,23 @@ data:
     sinks:
     - proxyAddress: wavefront-proxy.default.svc.cluster.local:2878
       filters:
+        # Optimized metrics collection to omit peripheral metrics.
+        metricDenyList:
+        - 'kubernetes.sys_container.*'
+        - 'kubernetes.collector.runtime.*'
+        - 'kubernetes.*.network.rx_rate'
+        - 'kubernetes.*.network.rx_errors_rate'
+        - 'kubernetes.*.network.tx_rate'
+        - 'kubernetes.*.network.tx_errors_rate'
+        - 'kubernetes.*.memory.page_faults'
+        - 'kubernetes.*.memory.page_faults_rate'
+        - 'kubernetes.*.memory.major_page_faults'
+        - 'kubernetes.*.memory.major_page_faults_rate'
+        - 'kubernetes.*.filesystem.inodes'
+        - 'kubernetes.*.filesystem.inodes_free'
+        - 'kubernetes.*.ephemeral_storage.request'
+        - 'kubernetes.*.ephemeral_storage.limit'
+
         # Filter out generated labels
         tagExclude:
         - 'label?controller?revision*'
@@ -52,9 +70,6 @@ data:
       kubernetes_state_source:
         prefix: 'kubernetes.'
 
-      telegraf_sources:
-      # enable all telegraf plugins
-      - plugins: []
 
       ##########################################################################
       # Static source to collect control plane metrics from the API Server
