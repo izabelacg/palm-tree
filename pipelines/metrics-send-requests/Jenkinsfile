@@ -1,0 +1,19 @@
+// Send requests to Serverless applications periodically. It was created for testing purposes and it is being used to observe metrics going through Wavefront and to build dashboards.
+pipeline {
+    agent {
+        docker { image 'gcr.io/playground-igomes/ubuntu-siege:1.0' }
+    }
+    parameters {
+    }
+    stages {
+        stage('send-requests') {
+            environment {
+            }
+
+            steps {
+                sh 'siege --reps=50 --concurrent=10 -H "Host: <host>" <app url>'
+                sh 'siege -r 50 -c 10 -H "Host: <host>" -H "Content-Type: text/plain" "<app url> POST"'
+            }
+        }
+    }
+}
