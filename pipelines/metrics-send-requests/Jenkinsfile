@@ -1,7 +1,7 @@
 // Send requests to Serverless applications periodically. It was created for testing purposes and it is being used to observe metrics going through Wavefront and to build dashboards.
 pipeline {
     agent {
-        docker { image 'gcr.io/playground-igomes/ubuntu-siege:1.0' }
+        docker { image 'gcr.io/playground-igomes/ubuntu-loadtest:1.1' }
     }
     parameters {
     }
