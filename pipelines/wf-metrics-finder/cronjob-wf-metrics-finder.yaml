@@ -1,0 +1,116 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: wf-metrics-finder
+spec:
+  schedule: "*/20 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            metric-finder: cronjob
+        spec:
+          containers:
+            - name: metrics-finder
+              image: gcr.io/playground-igomes/ruby-wf-cli:latest
+              env:
+                # Wavefront Instance URL
+                - name: WAVEFRONT_ENDPOINT
+                  value: <wavefront-instance>
+                # Wavefront Proxy
+                - name: WAVEFRONT_PROXY
+                  value: <wavefront-proxy-pod-name>
+                #
+                - name: METRIC
+                  value: "tanzu.vmware.com/serverless"
+                # Wavefront CLI Token
+                - name: WAVEFRONT_TOKEN
+                  value: <wavefront-cli-token>
+              imagePullPolicy: IfNotPresent
+              args:
+                - /bin/bash
+                - -c
+                - |
+                  echo "Configuring wavefront-cli..."
+                  wf config envvars > /dev/null
+                  wf source list --limit 1 > /dev/null
+
+                  exitcode=$?
+                  if [ $exitcode -eq 0 ]; then
+                   echo "Connected to Wavefront."
+                  else
+                   echo "Could not connect to Wavefront"
+                   exit 1
+                  fi
+
+                  # TODO: find proxy dynamically per user maybe?
+                  #wf proxy list --active
+                  #wf proxy describe <proxy id>
+
+                  # ACTIVE PROXY
+                  response=$(wf proxy search hostname="$WAVEFRONT_PROXY")
+                  if [ "$response" == "No matches." ]; then
+                    echo "Could not find active proxy $WAVEFRONT_PROXY"
+                    exit 1
+                  else
+                    proxy_id=$(echo "$response" | cut -d " " -f1)
+                  fi
+                  echo "Proxy $WAVEFRONT_PROXY has id number: $proxy_id"
+
+                  # METRIC
+
+                  # echo "Searching for recent metrics starting with $METRIC"
+                  # Very slow
+                  # wf spy points --prefix="$METRIC" --end-after=60
+
+                  declare -a metric_list=(
+                    "contour"
+                    "kn_activator"
+                    "kn_autoscaler"
+                    "kn_contour"
+                    "kn_controller"
+                    "kn_webhook"
+                  )
+
+                  wf query "ts(tanzu.vmware.com/serverless.contour.contour.build.info.gauge)" -f json > contour_response 2> contour_error
+                  wf query "ts(tanzu.vmware.com/serverless.knative.activator.client.results.counter)" -f json > kn_activator_response 2> kn_activator_error
+                  wf query "ts(tanzu.vmware.com/serverless.knative.autoscaler.client.results.counter)" -f json > kn_autoscaler_response 2> kn_autoscaler_error
+                  wf query "ts(tanzu.vmware.com/serverless.knative.contour.ingress.controller.client.results.counter)" -f json > kn_contour_response 2> kn_contour_error
+                  wf query "ts(tanzu.vmware.com/serverless.knative.controller.client.results.counter)" -f json > kn_controller_response 2> kn_controller_error
+                  wf query "ts(tanzu.vmware.com/serverless.knative.webhook.client.results.counter)" -f json > kn_webhook_response 2> kn_webhook_error
+
+                  failed=0
+                  for metric in "${metric_list[@]}"; do
+                    echo -e "\n********** ${metric} **********"
+
+                    now=$(date +%s)
+                    last_reported=$(jq '.timeseries[0].data[-1][0]' "${metric}_response")
+                    time_elapsed=$((now - last_reported))
+
+                    if [ -z "$last_reported" ] || [ "$last_reported" == "null" ]; then
+                      failed=1
+                    else
+                      echo "Time elapsed since $last_reported and $now: $time_elapsed"
+                    fi
+
+                    if (( time_elapsed <= 1200 )); then
+                      echo "INFO: $time_elapsed seconds since last report of: $metric"
+                    else
+                      echo "*** WARNING ***: Last reported timestamp: $last_reported. Time elapsed: $time_elapsed"
+                      failed=1
+                    fi
+
+                    if [ -s "${metric}"_error ]; then
+                      failed=1
+                      echo "Error message from 'wf query for ${metric}:"
+                      echo -e "\n----------------------------------------------"
+                      cat "${metric}_error"
+                      echo -e "\n----------------------------------------------"
+                    fi
+                  done
+
+                  if [ $failed -ne 0 ]; then
+                    exit 1
+                  fi
+          restartPolicy: OnFailure

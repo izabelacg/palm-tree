@@ -1,4 +1,3 @@
-// It periodically runs a script to search Wavefront for specific metrics from Serverless. It errors out if a metric is not found in the last 20 minutes or so. It was created for testing purposes to mainly monitor the activator pod that from time to time stops emitting metrics for an unknown reason.
 pipeline {
     agent {
         docker { image 'gcr.io/playground-igomes/ruby-wf-cli:latest' }

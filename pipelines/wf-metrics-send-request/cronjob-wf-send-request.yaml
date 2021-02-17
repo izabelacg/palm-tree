@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: wf-send-request
+spec:
+  schedule: "*/2 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            metric-send-request: cronjob
+        spec:
+          containers:
+            - name: send-request
+              image: gcr.io/playground-igomes/ubuntu-loadtest:1.1
+              imagePullPolicy: IfNotPresent
+              args:
+                - /bin/bash
+                - -c
+                - |
+                  curl http://helloworld-go.default.35.193.182.249.xip.io
+                  wrk -d30s -t5 -c10 -H "Host: app-helloworld.demo.example.com" "http://a94d931886db24f04836494f98a72b68-696518460.us-east-2.elb.amazonaws.com"
+                  curl -H "Host: app-helloworld.demo.example.com" "http://a94d931886db24f04836494f98a72b68-696518460.us-east-2.elb.amazonaws.com/?sleep=2s"
+          restartPolicy: OnFailure
